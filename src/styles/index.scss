@@ -1,0 +1,47 @@
+@import "bootstrap.override";
+@import "fonts";
+
+
+
+
+
+header {
+  .cities-input{
+    max-width: 320px;
+  }
+  -webkit-transform: translate3d(0, 0, 0);
+}
+
+
+body, html{
+  background-color: $white !important;
+  overflow: hidden;
+}
+
+footer {
+  position: fixed;
+  left: 0;
+  bottom: 16px;
+}
+
+
+
+.myShowMoreText{
+  * {
+    line-height: unset;
+  }
+}
+
+.cursor-pointer{
+  cursor: pointer;
+}
+
+body {
+  margin: 0;
+  background-color: $backgroundColor;
+  #webpack-dev-server-client-overlay{
+    display: none !important;
+  }
+}
+
+

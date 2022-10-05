@@ -1,0 +1,42 @@
+@import "src/styles/colors.module";
+div{
+  &.placeCard{
+    border: none;
+    .mapContainer{
+      height: 300px;
+    }
+
+    transition: all 0.5s ease-in-out;
+    min-height: 100%;
+    .cardEnd {
+      height: 240px;
+    }
+    .bg-image{
+      position: relative;
+      overflow: hidden;
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: 50%;
+      .mask{
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+      .mask-custom {
+        backdrop-filter: contrast(95%) brightness(102%) saturate(200%) sepia(27%) hue-rotate(-10deg) grayscale(0%) invert(0%) blur(0px);
+        mix-blend-mode: normal;
+        opacity: 1;
+      }
+    }
+
+    .reviewsGrid{
+      display: grid;
+      grid-template-columns: 1fr 1.8fr 0.2fr;
+    }
+  }
+}

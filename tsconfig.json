@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "target": "es5",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": false,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@components/*": ["components/*"],
+      "@svg-icons": ["assets/icons/index.ts"],
+      "@colors": ["styles/colors.module.scss"],
+      "@common/*": ["components/common/*"],
+      "@pages/*": ["pages/*"],
+      "@styles/*": ["styles/*"],
+      "@globalTypes": ["globals.d.ts"],
+      "@api": ["./api/Api.service.ts"],
+      "@services/*": ["services/*"]
+    },
+    "jsx": "react-jsx"
+  },
+  "include": [
+    "src"
+  ]
+}

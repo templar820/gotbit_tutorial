@@ -1,0 +1,1 @@
+export type svgNamesType = "clear" | "like_count_tutorial" | "like_tutorial" | "skip_tutorial";
