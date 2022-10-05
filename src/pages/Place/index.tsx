@@ -4,126 +4,105 @@ import React, {
 import MobXRouterDecorator from '@components/HOC/MobXRouterDecorator';
 import { MOBXDefaultProps } from '@globalTypes';
 import './index.scss';
-import TabBar from '@common/TabBar';
-import PlaceCard from '@pages/Place/PlaceCard';
-import PageNotFound from '@components/system/PageNotFound';
-import Emoji from 'a11y-react-emoji';
-import { Typography } from '@mui/material';
-import { TutorialStatus } from '@services/App.service';
-import { ReactionsEnum } from '@services/Places.service';
-import useTutorial from '../../hooks/useTutorial';
-import { usePosition } from '../../hooks/usePosition';
-import UTILS from '../../utils';
+import {Button, Checkbox, FormControlLabel, TextField} from "@mui/material";
+import { useWeb3React } from "@web3-react/core"
+import {injected} from "@components/web3/connector"
+import {useChain, useMoralis} from "react-moralis";
+
+
+const data = [
+    {
+        days: 30,
+        APY: 110
+    },
+    {
+        days: 60,
+        APY: 120
+    },
+    {
+        days: 90,
+        APY: 125
+    },
+    {
+        days: 180,
+        APY: 140
+    },
+    {
+        days: 365,
+        APY: 160
+    },
+]
 
 function PlacePage(props: MOBXDefaultProps) {
-  const [lastReaction, setLastReaction] = useState(null);
-
-  const [firstRender, setFirstRender] = useState(true);
-  const list = props.PlacesStore.places;
-  const currentIndex = props.PlacesStore.currentPlaceIndex;
-  const nextRef = useRef();
-  const likeRef = useRef();
-
-  useEffect(() => {
-    props.AppStore.setLikeReference(likeRef);
-    props.AppStore.setSkipReference(nextRef);
-  }, []);
-
-  const url = usePosition();
-
-  const modifyList = useMemo(() => {
-    return props.PlacesStore.places.reduce((acc, el) => {
-      if (!el) return acc;
-      acc.push({
-        ...el,
-        ref: React.createRef(),
-      });
-      return acc;
-    }, []);
-  }, [list, list.length, url]);
-
-  // в утилсы должен быть чистый компонент максимально
-
-  useEffect(() => {
-    setLastReaction(null);
-    setFirstRender(true);
-    setTimeout(() => {
-      setFirstRender(false);
-    }, 1500);
-  }, [props.PlacesStore.currentCity?.id]);
-
-  useEffect(() => {
-    if (props.PlacesStore.currentCity) {
-      props.services.placesService.getPlaces();
+  const [type, setType] = useState(null)
+  const [amount, setAmount] = useState(null)
+  const { active, account, library, connector, activate, deactivate } = useWeb3React()
+  
+  
+  // const {isAuthenticated, authenticate, user, logout} = useMoralis()
+  
+  async function connect() {
+    try {
+      await activate(injected)
+    } catch (ex) {
+      console.log(ex)
     }
-  }, [props.PlacesStore.currentCity]);
-
-  const endCard = (currentIndex >= modifyList.length) && !firstRender;
-
-  useTutorial(lastReaction, props.services.placesService, setLastReaction, props.history);
-
+  }
+  
+  async function disconnect() {
+    try {
+      deactivate()
+    } catch (ex) {
+      console.log(ex)
+    }
+  }
+  
+  useEffect(() => {
+    const connectWalletOnPageLoad = async () => {
+      if (localStorage?.getItem('isWalletConnected') === 'true') {
+        try {
+          await activate(injected)
+          localStorage.setItem('isWalletConnected', true)
+        } catch (ex) {
+          console.log(ex)
+        }
+      }
+    }
+    connectWalletOnPageLoad()
+  }, [])
+  
   return (
-    <>
-      <div className="position-relative h-100 w-100 mh-100">
-        {modifyList.map((place, index) => {
-          return (
-            <div
-              key={place.id}
-              id={place.id}
-              className="placeCard w-100 h-100 mh-100 position-absolute overflow-auto"
-              style={{ zIndex: list.length - index, left: 0, top: 0 }}
-              ref={place.ref}
-            >
-              <PlaceCard place={place} minifyMode={currentIndex !== index} />
-            </div>
-          );
-        })}
-        {endCard
-          ? (
-            <PageNotFound
-              title={<Typography variant="h2">К сожалению карточки закончились</Typography>}
-              description={(
-                <Typography className="my-2" variant="body2">
-                  Предлагаем кликнуть на
-                  <Emoji className="mx-1" symbol="❤️" label="love" />
-                  сверху и посмотреть выбранные места
-                </Typography>
-              )}
-            />
-          )
-          : null}
-      </div>
-      {modifyList.length
-      && (
-        <TabBar
-          hidePrevious={currentIndex === 0}
-          hideNext={endCard}
-          hideDislike={endCard}
-          hideLike={endCard}
-          nextRef={nextRef}
-          likeRef={likeRef}
-          onClickNext={(reactions) => {
-            setLastReaction(reactions);
-            props.services.placesService.actionsPlace(reactions);
-            if (reactions === ReactionsEnum.SKIP) {
-              props.AppStore.setTutorialStatus({ skip: TutorialStatus.PASSED });
-            }
+    <div className="d-flex flex-column">
+        <div className={"my-4"}>
+            {data.map((el) => {
+                return (
+                    <FormControlLabel
+                        value="bottom"
+                        control={<Checkbox checked={type?.APY === el.APY} onClick={() => {
+                          setType(el)
+                        }} />}
+                        label={el.days + " days; " + el.APY + " APY"}
+                        labelPlacement="bottom"
+                    />
+                )
+            })}
+        </div>
 
-            if (reactions === ReactionsEnum.LIKE) {
-              props.AppStore.setTutorialStatus({ like: TutorialStatus.PASSED });
-            }
+        <TextField value={amount} label="Enter amount" onChange={(e) => setAmount(e.target.value)} />
+        <Button
+          onClick={() => {
+            connect()
+          }}
+        >CONNECT WALLET</Button>
+        {active ? <span>Connected with <b>{account}</b></span> : <span>Not connected</span>}
+        <Button
+          onClick={() => {
+            disconnect()
+          }}
+        >Disconect</Button>
 
-            const newIndex = UTILS.flipCardAndGetNewIndex('left', modifyList[currentIndex].ref.current, currentIndex);
-            props.PlacesStore.setCurrentPlaceIndex(newIndex);
-          }}
-          onClickPrevious={() => {
-            setLastReaction(null);
-            const newIndex = UTILS.flipCardAndGetNewIndex('right', modifyList[currentIndex].ref.current, currentIndex);
-            props.PlacesStore.setCurrentPlaceIndex(newIndex);
-          }}
-        />
-      )}
-    </>
+
+    </div>
 
   );
 }

@@ -1,124 +1,170 @@
 import React, { useEffect, useRef, useState } from 'react';
 import MobXRouterDecorator from '@components/HOC/MobXRouterDecorator';
 import { MOBXDefaultProps } from '@globalTypes';
-import PlaceIcon from '@mui/icons-material/Place';
-import {
-  Button, IconButton, Menu, MenuItem, Typography
-} from '@mui/material';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import MyTag from '@common/MyTag';
-import Colors from '@colors';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
-import { EventTrackEnum } from '@services/Places.service';
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import Toolbar from '@mui/material/Toolbar';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import Menu from '@mui/material/Menu';
+import MenuIcon from '@mui/icons-material/Menu';
+import Container from '@mui/material/Container';
+import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
+import Tooltip from '@mui/material/Tooltip';
+import MenuItem from '@mui/material/MenuItem';
+import AdbIcon from '@mui/icons-material/Adb';
+
+
+
+
+const pages = ['Products', 'Pricing', 'Blog'];
+const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 function Header(props: MOBXDefaultProps) {
-  const [value, setValue] = useState(null);
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const ref = useRef();
 
-  const placesStore = props.PlacesStore;
 
-  const url = new URL(window.location.href);
-  const isFavorite = url.pathname.includes('favorite');
+  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
+  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
-  useEffect(() => {
-    props.AppStore.setSummaryReference(ref);
-  }, []);
+  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElNav(event.currentTarget);
+  };
+  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElUser(event.currentTarget);
+  };
 
-  useEffect(() => {
-    const data = {
-      name: url.href.replace(url.origin+"/","").replace(url.search,""),
-      ...Object.fromEntries(url.searchParams.entries())
-    }
-    props.services.placesService.trackLoadPage(EventTrackEnum.URL_LOADED, data);
-  }, [url]);
+  const handleCloseNavMenu = () => {
+    setAnchorElNav(null);
+  };
 
-  useEffect(() => {
-    props.services.placesService.getCities();
-    props.services.placesService.getFavoritePlaces();
-  }, []);
-
-  useEffect(() => {
-    setValue(placesStore.currentCity);
-    if (placesStore.currentCity) {
-      url.searchParams.set('region', placesStore.currentCity.name);
-      history.pushState(null, null, url);
-    }
-  }, [placesStore.currentCity]);
-
-  const toFavoritePlaces = () => {
-    if (!isFavorite) {
-      props.history.push('/favorite');
-    } else {
-      props.history.push('/?region=' + props.PlacesStore.currentCity?.name);
-    }
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
   };
 
   return (
-    <header className="w-100 px-2" onClick={() => setAnchorEl(null)}>
-      <div className="d-flex justify-content-between align-items-center align-content-center my-2">
-        <div className="cities-input">
-          {isFavorite
-            ? (
-              <IconButton onClick={() => {
-                toFavoritePlaces();
-              }}
+      <AppBar position="static">
+        <Container maxWidth="xl">
+          <Toolbar disableGutters>
+            <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+            <Typography
+                variant="h6"
+                noWrap
+                component="a"
+                href="/"
+                sx={{
+                  mr: 2,
+                  display: { xs: 'none', md: 'flex' },
+                  fontFamily: 'monospace',
+                  fontWeight: 700,
+                  letterSpacing: '.3rem',
+                  color: 'inherit',
+                  textDecoration: 'none',
+                }}
+            >
+              LOGO
+            </Typography>
+
+            <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+              <IconButton
+                  size="large"
+                  aria-label="account of current user"
+                  aria-controls="menu-appbar"
+                  aria-haspopup="true"
+                  onClick={handleOpenNavMenu}
+                  color="inherit"
               >
-                <ArrowBackIosNewOutlinedIcon color="black" />
+                <MenuIcon />
               </IconButton>
-            ) : (
-              <Button
-                className="p-3"
-                aria-haspopup="true"
-                color="primary"
-                variant="outlined"
-                disableElevation
-                onClick={(e) => {
-                  setAnchorEl(anchorEl ? null : e.currentTarget);
-                  e.stopPropagation();
-                }}
-                startIcon={<PlaceIcon fontSize="small" />}
-                endIcon={<KeyboardArrowDownIcon fontSize="small" />}
+              <Menu
+                  id="menu-appbar"
+                  anchorEl={anchorElNav}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'left',
+                  }}
+                  open={Boolean(anchorElNav)}
+                  onClose={handleCloseNavMenu}
+                  sx={{
+                    display: { xs: 'block', md: 'none' },
+                  }}
               >
-                <Typography variant="button">{value?.name}</Typography>
-              </Button>
-            )}
-          <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={() => setAnchorEl(null)}>
-            {placesStore.cities.map((city) => (
-              <MenuItem
-                key={city.id}
-                onClick={() => {
-                  placesStore.setCurrentCity(city);
-                  setAnchorEl(null);
+                {pages.map((page) => (
+                    <MenuItem key={page} onClick={handleCloseNavMenu}>
+                      <Typography textAlign="center">{page}</Typography>
+                    </MenuItem>
+                ))}
+              </Menu>
+            </Box>
+            <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
+            <Typography
+                variant="h5"
+                noWrap
+                component="a"
+                href=""
+                sx={{
+                  mr: 2,
+                  display: { xs: 'flex', md: 'none' },
+                  flexGrow: 1,
+                  fontFamily: 'monospace',
+                  fontWeight: 700,
+                  letterSpacing: '.3rem',
+                  color: 'inherit',
+                  textDecoration: 'none',
                 }}
+            >
+              LOGO
+            </Typography>
+            <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+              {pages.map((page) => (
+                  <Button
+                      key={page}
+                      onClick={handleCloseNavMenu}
+                      sx={{ my: 2, color: 'white', display: 'block' }}
+                  >
+                    {page}
+                  </Button>
+              ))}
+            </Box>
+
+            <Box sx={{ flexGrow: 0 }}>
+              <Tooltip title="Open settings">
+                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                  <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                </IconButton>
+              </Tooltip>
+              <Menu
+                  sx={{ mt: '45px' }}
+                  id="menu-appbar"
+                  anchorEl={anchorElUser}
+                  anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  open={Boolean(anchorElUser)}
+                  onClose={handleCloseUserMenu}
               >
-                <Typography variant="subtitle2">{city.name}</Typography>
-              </MenuItem>
-            ))}
-          </Menu>
-        </div>
-        {isFavorite && <Typography variant="h1">PickSpot</Typography>}
-        <IconButton
-          ref={ref}
-          tabIndex={15}
-          onClick={() => {
-            toFavoritePlaces();
-          }}
-        >
-          <MyTag
-            withoutBorder
-            icon={<Typography variant="h5" color={Colors.black}>{props.PlacesStore.favoritePlaces.length}</Typography>}
-            backgroundColor={Colors.red5}
-          >
-            <FavoriteIcon color="white" />
-          </MyTag>
-        </IconButton>
-
-      </div>
-
-    </header>
-  );
+                {settings.map((setting) => (
+                    <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                      <Typography textAlign="center">{setting}</Typography>
+                    </MenuItem>
+                ))}
+              </Menu>
+            </Box>
+          </Toolbar>
+        </Container>
+      </AppBar>
+  )
 }
 
 export default MobXRouterDecorator(Header);
